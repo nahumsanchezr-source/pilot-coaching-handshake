@@ -63,12 +63,42 @@ const NewSession: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const payload = formData as SessionCreatePayload;
+      const payload: SessionCreatePayload = {
+        pilot_name: (formData.pilot_name || '').trim(),
+        pilot_email: (formData.pilot_email || '').trim(),
+        leader_name: (formData.leader_name || '').trim(),
+        shift: formData.shift || Shift.MORNING,
+        site: (formData.site || '').trim(),
+        coaching_type: formData.coaching_type || CoachingType.PERFORMANCE,
+        what_happened: (formData.what_happened || '').trim(),
+        correct_expectation: (formData.correct_expectation || '').trim(),
+        is_recurrent: formData.is_recurrent || Recurrence.NO,
+        root_cause_type: formData.root_cause_type || RootCauseType.SKILL,
+        root_cause_details: (formData.root_cause_details || '').trim(),
+        action_plan_steps: (formData.action_plan_steps || '').trim(),
+        action_owner: formData.action_owner || ActionOwner.PILOT,
+        follow_up_required: !!formData.follow_up_required,
+        follow_up_date: formData.follow_up_required && formData.follow_up_date ? formData.follow_up_date : null,
+      };
+
       const res = await createSession(payload);
       setPilotToken(res.data.pilot_token);
       setModalOpen(true);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to create session. Please verify all inputs.');
+      if (err.response?.data?.detail) {
+        if (Array.isArray(err.response.data.detail)) {
+          const msgs = err.response.data.detail
+            .map((item: any) => `${item.loc[item.loc.length - 1]}: ${item.msg}`)
+            .join(' | ');
+          setError(`Validation error: ${msgs}`);
+        } else {
+          setError(String(err.response.data.detail));
+        }
+      } else if (err.message && err.message.toLowerCase().includes('network')) {
+        setError('El servidor está despertando de reposo (Render Free Tier). Por favor espera 15-30 segundos y vuelve a presionar el botón.');
+      } else {
+        setError(err.message || 'Error al conectar con el servidor.');
+      }
     } finally {
       setLoading(false);
     }
