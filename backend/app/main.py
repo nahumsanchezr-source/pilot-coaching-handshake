@@ -9,6 +9,12 @@ from app.routers import sessions, handshake
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    # Auto-seed demonstration cases if database is fresh/empty
+    try:
+        from seed import seed
+        seed()
+    except Exception as e:
+        print(f"Auto-seed check: {e}")
     yield
 
 app = FastAPI(
@@ -18,7 +24,7 @@ app = FastAPI(
 )
 
 # Read CORS origins from environment variable
-cors_env = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173")
+cors_env = os.getenv("CORS_ORIGINS", "*")
 origins = [origin.strip() for origin in cors_env.split(",") if origin.strip()]
 
 app.add_middleware(
