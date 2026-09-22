@@ -14,7 +14,7 @@ services:
       - key: DATABASE_URL
         value: "sqlite:///./coaching.db"
 
-  # Frontend Static Site (Global CDN, no region or plan needed)
+  # Frontend Static Site (Global CDN)
   - type: web
     name: skyops-frontend-ui
     env: static
@@ -30,4 +30,4 @@ services:
         fromService:
           type: web
           name: skyops-backend-api
-          property: url
+          property: host

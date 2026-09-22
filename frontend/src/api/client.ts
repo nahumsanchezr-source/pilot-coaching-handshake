@@ -1,7 +1,14 @@
 import axios from 'axios';
 import type { CoachingSession, SessionCreatePayload, PilotCommitmentPayload, FollowUpClosePayload, Status } from '../types';
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+let rawBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+// Handle cases where VITE_API_URL is just the hostname (e.g. from Render property: host)
+if (rawBaseURL && !rawBaseURL.startsWith('http://') && !rawBaseURL.startsWith('https://') && !rawBaseURL.startsWith('/')) {
+  rawBaseURL = `https://${rawBaseURL}`;
+}
+
+const baseURL = rawBaseURL;
 
 const api = axios.create({
   baseURL,
